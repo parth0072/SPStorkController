@@ -31,18 +31,13 @@ open class SPStorkIndicatorView: UIView {
                     self.leftView.transform = .identity
                     self.rightView.transform = .identity
                 }
-            case .arrow:
-                self.animate {
-                    let angle = CGFloat(20 * Float.pi / 180)
-                    self.leftView.transform = CGAffineTransform.init(rotationAngle: angle)
-                    self.rightView.transform = CGAffineTransform.init(rotationAngle: -angle)
-                }
+
             }
             
         }
     }
     
-    var color: UIColor = UIColor.init(red: 202/255, green: 201/255, blue: 207/255, alpha: 1) {
+    var color: UIColor = UIColor.init(red: 142/255, green: 142/255, blue: 147/255, alpha: 0.16) {
         didSet {
             self.leftView.backgroundColor = self.color
             self.rightView.backgroundColor = self.color
@@ -57,7 +52,7 @@ open class SPStorkIndicatorView: UIView {
         self.backgroundColor = UIColor.clear
         self.addSubview(self.leftView)
         self.addSubview(self.rightView)
-        self.color = UIColor.init(red: 202/255, green: 201/255, blue: 207/255, alpha: 1)
+        var color: UIColor = UIColor.init(red: 202/255, green: 201/255, blue: 207/255, alpha: 1) 
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -66,7 +61,7 @@ open class SPStorkIndicatorView: UIView {
 
     override open func sizeToFit() {
         super.sizeToFit()
-        self.frame = CGRect.init(x: self.frame.origin.x, y: self.frame.origin.y, width: 36, height: 13)
+        self.frame = CGRect.init(x: self.frame.origin.x, y: self.frame.origin.y, width: 77, height: 5)
         
         let height: CGFloat = 5
         let correction = height / 2
@@ -87,7 +82,6 @@ open class SPStorkIndicatorView: UIView {
     }
     
     enum Style {
-        case arrow
         case line
     }
 }

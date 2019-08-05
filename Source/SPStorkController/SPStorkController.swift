@@ -32,7 +32,7 @@ public struct SPStorkController {
                     scrollView.subviews.forEach {
                         $0.transform = CGAffineTransform(translationX: 0, y: -translation)
                     }
-                    presentationController.setIndicator(style: scrollView.isTracking ? .line : .arrow)
+                    presentationController.setIndicator(style: scrollView.isTracking ? .line : .line)
                     if translation >= presentationController.translateForDismiss * 0.4 {
                         if !scrollView.isTracking && !scrollView.isDragging {
                             presentationController.presentedViewController.dismiss(animated: true, completion: {
@@ -45,7 +45,7 @@ public struct SPStorkController {
                         presentationController.scrollViewDidScroll(translation * 2)
                     }
                 } else {
-                    presentationController.setIndicator(style: .arrow)
+                    presentationController.setIndicator(style: .line)
                     presentationController.scrollViewDidScroll(0)
                 }
                 

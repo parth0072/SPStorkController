@@ -32,7 +32,8 @@ class SPStorkPresentationController: UIPresentationController, UIGestureRecogniz
     var customHeight: CGFloat? = nil
     var translateForDismiss: CGFloat = 200
     var hapticMoments: [SPStorkHapticMoments] = [.willDismissIfRelease]
-    
+    var shouldRecognizeSimultaneouslyWith:Bool = false
+
     var transitioningDelegate: SPStorkTransitioningDelegate?
     weak var storkDelegate: SPStorkControllerDelegate?
     
@@ -64,11 +65,19 @@ class SPStorkPresentationController: UIPresentationController, UIGestureRecogniz
     
     private var scaleForPresentingView: CGFloat {
         guard let containerView = containerView else { return 0 }
-        let factor = 1 - (self.topSpace * 2 / containerView.frame.height)
+        let factor = 1 - ((self.cornerRadius + 3) * 2 / containerView.frame.width)
         return factor
     }
     
     private var feedbackGenerator: UIImpactFeedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+    
+    override var presentedView: UIView? {
+        let view = self.presentedViewController.view
+        if view?.frame.origin == CGPoint.zero {
+            view?.frame = self.frameOfPresentedViewInContainerView
+        }
+        return view
+    }
     
     override var frameOfPresentedViewInContainerView: CGRect {
         guard let containerView = containerView else { return .zero }
@@ -103,7 +112,6 @@ class SPStorkPresentationController: UIPresentationController, UIGestureRecogniz
             presentedView.addSubview(self.indicatorView)
         }
         self.updateLayoutIndicator()
-        self.indicatorView.style = .arrow
         self.gradeView.alpha = 0
         
         if self.showCloseButton {
@@ -126,7 +134,7 @@ class SPStorkPresentationController: UIPresentationController, UIGestureRecogniz
             self.backgroundView.leftAnchor.constraint(equalTo: window.leftAnchor),
             self.backgroundView.rightAnchor.constraint(equalTo: window.rightAnchor),
             self.backgroundView.bottomAnchor.constraint(equalTo: window.bottomAnchor)
-        ])
+            ])
         
         let transformForSnapshotView = CGAffineTransform.identity
             .translatedBy(x: 0, y: -snapshotViewContainer.frame.origin.y)
@@ -222,7 +230,7 @@ class SPStorkPresentationController: UIPresentationController, UIGestureRecogniz
         self.startDismissing = true
         
         let initialFrame: CGRect = presentingViewController.isPresentedAsStork ? presentingViewController.view.frame : containerView.bounds
-
+        
         let initialTransform = CGAffineTransform.identity
             .translatedBy(x: 0, y: -initialFrame.origin.y)
             .translatedBy(x: 0, y: self.topSpace)
@@ -326,7 +334,6 @@ extension SPStorkPresentationController {
                     self.storkDelegate?.didDismissStorkBySwipe?()
                 })
             } else {
-                self.indicatorView.style = .arrow
                 UIView.animate(
                     withDuration: 0.6,
                     delay: 0,
@@ -350,6 +357,10 @@ extension SPStorkPresentationController {
             return abs(velocity.y) > abs(velocity.x)
         }
         return true
+    }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return self.shouldRecognizeSimultaneouslyWith
     }
     
     func scrollViewDidScroll(_ translation: CGFloat) {
@@ -388,7 +399,7 @@ extension SPStorkPresentationController {
         
         let elasticThreshold: CGFloat = 120
         let translationFactor: CGFloat = 1 / 2
-
+        
         if translation >= 0 {
             let translationForModal: CGFloat = {
                 if translation >= elasticThreshold {
@@ -429,10 +440,7 @@ extension SPStorkPresentationController {
         guard let containerView = containerView else { return }
         self.updateSnapshotAspectRatio()
         if presentedViewController.view.isDescendant(of: containerView) {
-            UIView.animate(withDuration: 0.1) { [weak self] in
-                guard let `self` = self else { return }
-                self.presentedViewController.view.frame = self.frameOfPresentedViewInContainerView
-            }
+            self.presentedViewController.view.frame = self.frameOfPresentedViewInContainerView
         }
     }
     
@@ -504,7 +512,7 @@ extension SPStorkPresentationController {
             view.leftAnchor.constraint(equalTo: superView.leftAnchor),
             view.rightAnchor.constraint(equalTo: superView.rightAnchor),
             view.bottomAnchor.constraint(equalTo: superView.bottomAnchor)
-        ])
+            ])
     }
     
     private func addCornerRadiusAnimation(for view: UIView?, cornerRadius: CGFloat, duration: CFTimeInterval) {
